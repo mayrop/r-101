@@ -1,313 +1,561 @@
 ---
-title: "lab"
-output: pdf_document
+title: "Data Analysis with R for Software Engineers (Intro)"
+urlcolor: blue
+output: 
+  pdf_document:
+    latex_engine: pdflatex
+header-includes:
+    - \usepackage{setspace}\onehalfspacing
+    - \usepackage[document]{ragged2e}
+fontsize: 12pt
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+Sys.setenv(KMP_DUPLICATE_LIB_OK=TRUE)
 ```
 
-## Data Types
+# About R Programming Language
+Before diving into the R language, it is important to mention about other Statistical Software Packages. At the end of the day, R is not a general purpose programming language, but rather a programming language that its aimed to help for statistical analysis.
 
-Vector, matrices, data frames.
+## R vs Other Statistical Software Packages  
 
-### How to create a vector
+### SPSS  
+
+SPSS (originally “Statistical Package for the Social Sciences”) is mostly used in Social Sciences and uses a graphical user interface (GUI), though historically, it was a command-line program. It was one of the earliest statistical packages, with the first release being in 1968. SPSS was acquired in 2009 by IBM, and between 2009 and 2010, the product was referred to as PASW (Predictive Analytics SoftWare). As of January 2010, it became "SPSS: An IBM Company".
+
+### SAS  
+The SAS (previously "Statistical Analysis System") system dominates the commercial market. It was developed at North Carolina State University from 1966 until 1976, when SAS Institute was incorporated. SAS is a really [expensive software](https://thomaswdinsmore.com/2014/12/15/sas-versus-r-part-two/). The pharmaceutical industry uses almost exclusively SAS.
+
+### Stata  
+
+Stata is a more recent statistical package with the first version being released in 1985. Since then, it has become increasingly popular in the areas of epidemiology and economics, and probably now rivals SPSS and SAS in it user base.
+
+### S  
+
+S is a statistical programming language developed between 1975 and 1976 primarily by John Chambers and (in earlier versions) Rick Becker and Allan Wilks of Bell Laboratories. The aim of the language, as expressed by John Chambers, was “to turn ideas into software, quickly and faithfully.”
+
+The S engine was licensed to and finally purchased by Insightful (now acquired by TIBCO) in 1988, which sells a value-added version called S-Plus containing a graphical user interface. S-Plus used to dominate the high-end market (academic and industrial research).
+
+### R  
+R is an alternative implementation of the S programming language combined with lexical scoping semantics, started in 1991 by Ross Ihaka and Robert Gentleman at the University of Auckland, New Zealand. The first official release came in 1995. R is currently now maintained by the R Core Team. R is a dynamically typed and interpreted programming language. At its heart, R is a functional programming language, but the R system includes some support for object-oriented programming (OOP). The official R software environment is written primarily in C, Fortran, and R itself, and is freely available under the GNU General Public License.
+
+R is comparable to SAS, SPSS, and Stata, but R is available to users at no charge under a free software license. R is more procedural-code oriented than either SAS or SPSS. R generally processes data in-memory, which limits its usefulness in processing extremely large files.
+
+\pagebreak
+## R vs Other Programming Languages
+
+R is usually compared to other languages in the Data Science world, it is particularly compared to Python, and more recently to Julia. 
+
+### R vs Python
+We will not discuss much about the differences between R and Python, there is already too much controversy, and a lot of information is already [online](https://www.google.com/search?q=r+vs+python+for+data+analysis&oq=r+vs+python+for+data). However, it is worth noting that one of the main advantages from R over Python is its ease to use for time series and forecasting. 
+
+### R vs Julia
+The differences from R vs Julia are much more interesting. To start with, Julia is a compiled language, whereas Python and R are interpreted. Julia is a multiple-paradigm (fully imperative, partially functional, and partially object-oriented) programming language designed for scientific and technical (read numerical) computing. I have read that Julia gives you C-like speed without optimization and hand-crafted profiling techniques, which makes it really interesting. Julia was created in 2009 by a four-person team and unveiled to the public in 2012, which makes it a relatively new language. Julia’s syntax is similar to Python’s—terse, but also expressive and powerful.
+
+\pagebreak
+## RStudio
+RStudio is an integrated development environment (IDE) to help you be more productive with R. It not only provides an editor for us to create and edit our R code but also provides many other useful tools which we will see later. The newest version of RStudio (1.4.11) improved support for Python, including an environment pane for Python and visualization of Python objects. This means that you can interchange data objects between R and Python in the same session.
+
+```{r, include=TRUE}
+# {r cars}
+cars <- head(mtcars)
+```
+
+```{python}
+# {python}
+import pprint
+pp = pprint.PrettyPrinter(width=41, compact=True)
+
+def print_df(df):
+    pp.pprint(df)
+
+print_df(r.cars)
+```
+
+\pagebreak
+# Data Types
+
+Atomic data types in R can be divided into:
+
+- `numeric` (9.2, 11, 232)
+- `integer` (1L, 10L, 100L, where the letter "L" declares this as an integer)
+- `complex` (1 + 3i, where "i" is the imaginary part)
+- `character/string` ("l", "R is the best", "TRUE", "9.2")
+- `logical/booleans` (TRUE or FALSE, T or F)
+
+```{r, include=TRUE, results = "hide"}
+x <- 10.5
+class(x)
+# [1] "numeric"
+
+x <- 1000L
+class(x)
+# [1] "integer"
+
+x <- 9i + 3
+class(x)
+# [1] "complex"
+
+x <- "R is exciting"
+class(x)
+# [1] "character"
+
+x <- TRUE
+class(x) 
+# [1] "logical"
+
+```
+
+## Data Structures
+- `Vectors`
+- `Matrices`
+- `Lists`
+- `Data Frames`
+- `Factors`
+
+### Vectors
+
+```{r, include=TRUE, results = "hide"}
+x <- c(0.5, 0.6)      ## numeric
+str(x)
+# num [1:2] 0.5 0.6
+
+x <- c(TRUE, FALSE)   ## logical
+str(x)
+# logi [1:2] TRUE FALSE
+
+x <- c("a", "b", "c") ## character
+str(x)
+# chr [1:3] "a" "b" "c"
+
+x <- 9:29
+str(x)
+# int [1:21] 9 10 11 12 13 14 15 16 17 18 ...
+
+```
+When different objects are mixed in a vector, coercion occurs so that every element in the vector is of the same class.
+
+```{r, include=TRUE, results = "hide"}
+x <- c(TRUE, 1, "a")   ## character
+str(x)
+# chr [1:3] "TRUE" "1" "a"
+
+x <- c(TRUE, 2)        ## numeric 
+# num [1:2] 1 2
+```
+
+You can also coerce into a different data type if you want:
+```{r, include=TRUE, results = "hide"}
+x <- c(1, 2, 3)
+str(x)
+# num [1:3] 1 2 3
+
+str(as.character(x))
+# chr [1:3] "1" "2" "3"
+```
+
+### Matrices
+Matrices are vectors with a dimension attribute.  Internally, R stores matrices in column-major mode, unlike C or Java where it would be stored in what is called "row-major mode", i.e. the rows would be stacked on top of each other.
+
+```{r, include=TRUE, results = "hide"}
+x <- matrix(1, nrow = 2, ncol = 2)
+x
+#     [,1] [,2]
+# [1,]    1    1
+# [2,]    1    1
+
+dim(x)
+# [1] 2 2
+
+matrix(1:6, ncol=2)
+#      [,1] [,2]
+# [1,]    1    4
+# [2,]    2    5
+# [3,]    3    6
+```
+
+You can combine two or more vectors into a matrix:
+```{r, include=TRUE, results = "hide"}
+x <- 2:4
+y <- 1:3
+z <- 10:12
+
+# column bind
+cbind(x, y, z)
+#      x y  z
+# [1,] 2 1 10
+# [2,] 3 2 11
+# [3,] 4 3 12
+
+# row bind
+m <- rbind(x, y, z)
+#   [,1] [,2] [,3]
+# x    2    3    4
+# y    1    2    3
+# z   10   11   12
+
+# Transpose of a matrix
+t(m)
+#      x y  z
+# [1,] 2 1 10
+# [2,] 3 2 11
+# [3,] 4 3 12
+
+# Matrices can only have one type, so data will be coerced
+# when combining vectors from different types
+rbind(x, y, z=c("a", "b", "c"))
+#   [,1] [,2] [,3]
+# x "2"  "3"  "4" 
+# y "1"  "2"  "3" 
+# z "a"  "b"  "c"
+
+m <- matrix(1:9, ncol=3)
+m
+#      [,1] [,2] [,3]
+# [1,]    1    4    7
+# [2,]    2    5    8
+# [3,]    3    6    9
+
+col(m)
+#      [,1] [,2] [,3]
+# [1,]    1    2    3
+# [2,]    1    2    3
+# [3,]    1    2    3
+
+row(m)
+#      [,1] [,2] [,3]
+# [1,]    1    1    1
+# [2,]    2    2    2
+# [3,]    3    3    3
+
+m[row(m) == col(m)]
+# [1] 1 5 9
+```
+
+### Lists
+Lists are a special type of vector that can contain elements of different classes. Lists a very important data type in R.
+
+```{r, include=TRUE, results = "hide"}
+x <- list(1, "abc", name=TRUE)
+x
+# [[1]]
+# [1] 1
+
+# [[2]]
+# [1] "abc"
+
+# $name
+# [1] TRUE
+
+x[1]
+# [[1]]
+# [1] 1
+
+x[[1]]
+# [1] 1
+
+x["name"]
+# $name
+# [1] TRUE
+
+x[["name"]]
+# [1] TRUE
+
+x$name
+# [1] TRUE
+```
+
+### Data Frames
+Data frames are similar to matrices, but they can have different types of data for different columns.
+```{r, include=TRUE, results = "hide"}
+df <- data.frame(x = 1:3, y = c("a", "b", "c"))
+df
+#   x y
+# 1 1 a
+# 2 2 b
+# 3 3 c
+
+# print the structure
+str(df)
+# 'data.frame':	3 obs. of  2 variables:
+#  $ x: int  1 2 3
+#  $ y: Factor w/ 3 levels "a","b","c": 1 2 3
+
+# print the colnames
+names(df)
+# [1] "x" "y"
+
+colnames(df)
+# [1] "x" "y"
+
+# access to the x column
+df$x
+# [1] 1 2 3
+
+# number of columns
+ncol(df)
+# [1] 2
+
+# number of rows
+nrow(df)
+# [1] 3
+
+# you can rename the colnames of a dataframe
+colnames(df) <- c("foo", "bar")
+df
+#   foo bar
+# 1   1   a
+# 2   2   b
+# 3   3   c
+```
+
+### Factors
+Factors are used to represent categorical data. They can be unordered or ordered.
+
+```{r, include=TRUE, results = "hide"}
+x <- factor(c("good", "bad", "bad", "good"))
+x
+# [1] good bad  bad  good
+# Levels: bad good
+
+levels(x)
+# [1] "bad"  "good"
+
+unclass(x)
+# [1] 2 1 1 2
+# attr(,"levels")
+# [1] "bad"  "good"
+```
+
+## Missing Data
+Missing values are denoted by NA. You can test objects if they are NA using `is.na()`. `NA` values have a class as well, so they are integer NA, character NA, etc.
+
+```{r, include=TRUE, results = "hide"}
+x <- c("abc", NA, 2, 4, TRUE)
+is.na(x)
+# [1] FALSE  TRUE FALSE FALSE FALSE
+
+x <- 1:5
+mean(x)
+
+# careful when applying certain functions to vectors with NA
+x <- c(1:5, NA)
+x
+# [1]  1  2  3  4  5 NA
+
+mean(x)
+# [1] NA
+
+mean(x, na.rm = TRUE)
+# [1] 3
+```
+
+
+## How to create a vector
 
 Let's say you want to create a vector `x = [2, 10, 11, 1, 23]`. The easiest way to create this vector is through the `c` function:
-```{r, include=TRUE}
+```{r, include=TRUE, results = "hide"}
 x <- c(2, 10, 11, 1, 23)
 ```
 
 In case you want to know what's the current value of variable x, you can either just add the command `x`. Alternative, you can use `print(x)`:
-```{r, include=TRUE}
+```{r, include=TRUE, results = "hide"}
 x # this will print the current value of x
+## [1]  2 10 11  1 23
 
 print(x) # this will also print it
-
+## [1]  2 10 11  1 23
 ```
 
 Now, let's say you want to create a vector with a sequence of numbers, such as creating a vector with the numbers from 1 to 10. There are different ways of accomplishing this, such as:
-```{r, include=TRUE}
+```{r, include=TRUE, results = "hide"}
 x <- 1:10
 x
-
+##  [1]  1  2  3  4  5  6  7  8  9 10
 ```
 
 In this case `1:10` denotes a way of creating a sequence of numbers from 1 to 10. You can also specify it in decreasing order, in case you want to create a sequence from 10 to 1:
-```{r, include=TRUE}
+```{r, include=TRUE, results = "hide"}
 x <- 10:1
 x
-
+##  [1] 10  9  8  7  6  5  4  3  2  1
 ```
 
 You can add to vectors together with the `c()` function:
-```{r, include=TRUE}
+```{r, include=TRUE, results = "hide"}
 x <- c(1:5, 5:1)
 x
-
+##  [1] 1 2 3 4 5 5 4 3 2 1
 ```
 
-```{r}
+```{r, results = "hide"}
 x <- c(10, 100, 1000) 
 y <- c(1, 2, 3) 
 z <- c(x, y, x)
 z
-
+## [1]   10  100 1000    1    23   10  100 1000
 ```
 
 You can also use a different function to create this vector, with the function `seq`:
-```{r, include=TRUE}
+```{r, include=TRUE, results = "hide"}
 x <- seq(1:10)
 x
-
+##  [1]  1  2  3  4  5  6  7  8  9 10
 ```
 
-Alternativity, you can use different syntax:
-```{r, include=TRUE}
+Alternatively, you can use different syntax:
+```{r, include=TRUE, results = "hide"}
 x <- seq(from=1, to=10)
 x
-
+##  [1]  1  2  3  4  5  6  7  8  9 10
 ```
 
 
 So this line `x <- seq(1:10)` is equivalent to `x <- seq(from=1, to=10)`. The latter has some advantages, such as defining other parameters. Let's say that in the sequence you want to have numbers increasing by 2:
-```{r, include=TRUE}
+```{r, include=TRUE, results = "hide"}
 x <- seq(from=1, to=10, by=2)
 x
-
+## [1] 1 3 5 7 9
 ```
 
 Or, you want exactly 7 numbers:
-```{r, include=TRUE}
+```{r, include=TRUE, results = "hide"}
 x <- seq(from=1, to=10, length.out=7)
 x
-
+## [1]  1.0  2.5  4.0  5.5  7.0  8.5 10.0
 ```
 
 R will automatically create the equally spaced sequence in the [1, 10] bounds. To see more parameters of seq function, check the R help (`?seq`).
 
 There are other way of specifying vectors, with the funcion `rep`. Let's say you want to create a vector of length 10, all of them being 1:
-```{r, include=TRUE}
+```{r, include=TRUE, results = "hide"}
 x <- rep(1, 10)
 x
-
+##  [1] 1 1 1 1 1 1 1 1 1 1
 ```
 
 There are other types of sequences you can do with rep, such as:
-```{r, include=TRUE}
+```{r, include=TRUE, results = "hide"}
 rep(1:3)
-
+## [1] 1 2 3
 
 rep(1:3, times=3)
-
+## [1] 1 2 3 1 2 3 1 2 3
 
 rep(1:3, each=3)
-
+## [1] 1 1 1 2 2 2 3 3 3
 ```
 
-Let's say you want to create a sequence of square numbers, `1  4  9 16 25`. You can do so by creating a vector, and then squaring it. R works as element base, so the square function will be applied to each element of the sequence:
-```{r}
-x <- 1:5
+
+
+
+\pagebreak
+# Differences between R and other Programming Languages
+
+## Vector indices in R start with 1, instead of 0
+```{r, include=TRUE, results = "hide"}
+x <- c(2, 10, 11, 1, 23)
+x[1]
+## [1] 2
+```
+
+## Assignment using <- instead =
+Even though assigning a value using = will work, the `<-` symbol is the preferred by the R ecosystem. You can also use the symbol `->` to assign a value from left to right, but it is not considered a [good practice](https://stat.ethz.ch/R-manual/R-patched/library/base/html/assignOps.html).
+
+```{r, include=TRUE, results = "hide"}
+x <- "hello"
 x
+## [1] "hello"
 
+x = "world"
+x
+## [1] "world"
 
-y <- x ^ 2 # alternative, you can use x ** 2
+x -> y
 y
-## 1  4  9 16 25
+## [1] "world"
 ```
 
-Now, let's say you want to create the sequence 1, 2, 4, 8, 16, 32. Notice this sequence is 2^n:
-```{r}
-x <- 2**(0:10)
-x 
-# [1]    1    2    4    8   16   32   64  128  256  512 1024
+## & and | instead of && and ||
+The shorter ones are vectorized, meaning they can return a vector, like this:
+
+```{r, include=TRUE, results = "hide"}
+((-2:2) >= 0) & ((-2:2) <= 0)
+# [1] FALSE FALSE  TRUE FALSE FALSE
 ```
 
-In this case, a vector is applied as a pow to a single number, creating a sequence of numbers. Note the use of the parenthesis.
-
-### Operations with vectors:
-
-You can do all kind of operations with vectors, +, -, /, etc. Operations are performed element-wise.
-```{r}
-x <- c(2, 3, 4, 5) 
-y <- c(1, 0, 3, 2)
-
-x + y
-
-
-(x + y) * 2
-
-
-x + y * 2
-
-```
-Note the different values in the third operation, as the `* 2` is applied to y before the sum to x.
-
-### How to access a vector element. Elements in R are index based, with the first index being 1 (instead of 0 like in other programming languages)
-```{r}
-x <- c(2, 4, 5, 8, 10)
+The longer form evaluates left to right examining only the first element of each vector, so the above gives
+```{r, include=TRUE, results = "hide"}
+((-2:2) >= 0) && ((-2:2) <= 0)
+# [1] FALSE
 ```
 
-In this case, 2 is index 1, 4 is index 2, 5 is index 3.
-```{r}
-x[1]
+See section 8.2.17 in [The R Inferno](http://www.burns-stat.com/pages/Tutor/R_inferno.pdf), titled "and and andand" for more information in this [StackOverflow question](https://stackoverflow.com/questions/6558921/boolean-operators-and).
 
+## if vs ifelse
+I still remember the hour that I spent looking at the code and trying to figure out what was wrong. `if` will work normally but does not support vectorized operations.
 
-x[2]
+```{r, include=TRUE, results = "hide", warning=FALSE}
 
+# normal operation
+if (10 > 5) {
+  print("yes, 10 is > than 5")
+}
+# [1] "yes, 10 is > than 5"
 
-x[3]
+# this one will throw a warning since only the first element of the vector 
+# (10) will be evaluated
+if (c(10, 2) > 5) {
+  print(TRUE)
+} else {
+  print(FALSE)
+}
+# [1] TRUE
+## Warning in if (c(10, 2) > 5) {: 
+## the condition has length > 1 and only the first## element will be used
 
+# this will be TRUE for the first element of the vector, 
+# and FALSE for the second
+ifelse (c(10, 2, 50) > 5, TRUE, FALSE)
+# [1]  TRUE FALSE TRUE
 ```
 
-If you want to access more than 1 element, you can specify a vector of indexes:
-```{r}
-x[1:3]
 
+\pagebreak
+## Packages
+R packages are extensions to the R statistical programming language. R packages contain code, data, and documentation in a standardized collection format that can be installed by users of R, typically via a centralized software repository such as [CRAN](https://cran.r-project.org/) (the Comprehensive R Archive Network). CRAN was officially announced 23 April 1997. It is a network of ftp and web servers around the world that store identical, up-to-date, versions of code and documentation for R. It is not that easy to get a package submitted to the CRAN, so if you develop your own package, other developers will be able to also download them from a remote installation, such as Github, using something like: `remotes::install_github("user/reponame")`, using the [`remotes`](https://cran.r-project.org/web/packages/remotes/index.html) package. At the time of this writing, there seems to be around ~17000 packages on the CRAN. You can find the increase of submitted packages over time  [here](https://gist.github.com/daroczig/3cf06d6db4be2bbe3368). 
+
+When you install a package using `install.packages()`, the needed resources will be downloaded locally. You can see the placement of such libraries using the function `.libPaths()`.
+
+For example:
+```{r, include=TRUE, results = "hide"}
+# checking the current package folder
+.libPaths()
+# [1] "/Library/Frameworks/R.framework/Versions/3.6/Resources/library"
 ```
 
-However, if you specify indexes that don't exist in the vector, R will return NAs:
-```{r}
-x[3:10]
+You can change the default folder using `.libPaths(c("/home/myfolder"))`, or by setting the `R_LIBS_USER` environment variable inside a `.Renviron` file. See more information [here](https://stackoverflow.com/questions/15170399/change-r-default-library-path-using-libpaths-in-rprofile-site-fails-to-work). Alternatively, you can use the `Sys.setenv()` function. To see what `R_LIBS_USER` is set to, you can use `?Sys.getenv()`. Note that if the folder from `R_LIBS_USER` does not exist, it will be ignored (see [here](https://stackoverflow.com/questions/53967385/r-libs-user-ignored-by-r)). 
 
+For more information, see [this documentation](https://stat.ethz.ch/R-manual/R-devel/library/base/html/libPaths.html) and [this one](https://stat.ethz.ch/R-manual/R-devel/library/base/html/libPaths.html).
+
+## Loaded Libraries
+Every time you restart RStudio, a new session will be created, which means that only default libraries will be loaded. If you want to use a function from an specific package, you'll need to load it thorugh the `library()` function. To see which packages are attached to the session, you can use the function `sessionInfo()`.
+
+```{r, include=TRUE}
+# load data.table package
+library(data.table)
+
+# check into the session
+sessionInfo()
 ```
 
-You can also subset this vector by removing some indices:
-```{r}
-x
+\pagebreak
+## R Built-in Datasets
+Try to start a new session in R (using command line), or through RStudio and type `cars`. You will a dataframe with the `speed` and `dist` columns. Now type `iris`. You will see a dataset with some columns like `Sepal.Length`, `Sepal.Width` and `Species`. You may be wondering where these things are coming from.
 
-x[-5]
+R comes with several built-in data sets, which are generally used as demo data for playing with R functions. The `iris` dataset is very popular in the Data Science world and it even has its own [Wikipedia page](https://en.wikipedia.org/wiki/Iris_flower_data_set)! You can read more about it [here](https://towardsdatascience.com/the-iris-dataset-a-little-bit-of-history-and-biology-fb4812f5a7b5).
 
-x[-c(4, 5)]
-```
-The commands above remove index 5 (second command) and 4,5 indices (third command).
-
-You can assign a value from the same way. Let's say you want to change the first number to be 9 instead of 2:
-```{r}
-x[1]
-
-x[1] <- 9 
-
-x[1]
-
-x
-```
-
-You can also assign a sequence of numbers in the same operation. Let's say you want the first thre elements to be 1, 2, 3:
-```{r}
-x
-
-x[1:3] <- c(1, 2, 3)
-x
-```
-
-Now let's assume you want to subset the vector based on some logic. If you have a vector from 1:5, you can specify which indices you want by a logic vector:
-```{r}
-x <- 1:5
-x
-
-x[c(TRUE, TRUE, FALSE, FALSE, TRUE)]
-
-# Equivalent to:
-x[c(1, 2, 5)]
-```
-
-This allow us to perform some logic for subsetting. Let's first see what happens when you perform comparison equations over a vector:
-```{r}
-x <- 1:5
-y <- x < 3
-y
-```
-
-If we have a vector of 1:5 (elements 1, 2, 3, 4, 5) and we use a comparison method of `x < 3` we obtain a vector with `c(TRUE, TRUE, FALSE, FALSE, FALSE)`. This means that the first 2 elements of vector `x` are `<3` and the rest elements of vector are not. Now we can use that vector to subset x in case we only want those elements:
-```{r}
-x[y]
-```
-
-What if we wanted the oposite? You want the numbers that are equal or higher than 3. You can imagine that an easy way to do it is:
-```{r}
-x <- 1:5
-z <- x >= 3
-z
-
-x[z]
-```
-
-However, you can use our previous vector and negate it:
-```{r}
-!y
-
-x[!y]
-```
-
-Subsetting though does not require to specify a different variable, you can apply the logic directly:
-```{r}
-x[x<3]
-
-x[!(x<3)]
-
-x[x>=3]
-```
-
-You can use more than one logic operations:
-```{r}
-x[x<3 | x==5]
-```
-
-What if you only want even numbers?
-```{r}
-x[x%%2 == 0]
-```
-
-### Operations with vectors
-You can do operations with vectors:
-```{r}
-x <- c(2, 2, 4, 6, 6)
-
-mean(x)
-sum(x)
-var(x)
-sd(x)
-```
-
-Be careful if you want to calculate the mean of the vector and the vector has NA:
-```{r}
-x <- c(2, 2, 4, 6, 6, NA)
-mean(x)
-```
-
-In order to calculate the mean of a vector with NA you can do either of the following commands:
-```{r}
-mean(na.omit(x))
-mean(x, na.rm = TRUE)
-```
-### How to create a matrix
+To see all the built in datasets within R, you can type `data()`.
 
 
-Internally, R stores matrices in column-major mode, i.e. the matrix is stored as [1 2 3 4 5 6 7 8 9] unlike C or Java where it would be stored in what is called "row-major mode", i.e. the rows would be stacked on top of each other.
-
-
-matrix(c(1, 2, 3, 4, 5, 6), ncol=2)
-matrix(NA, ncol=2, nrow=4)
-
-matrix(1, ncol=2, nrow=4)
-
-cbind(c(1,2,3), c(4,5,6))
-
-rbind(
-  c(1,2,3), 
-  c(4,5,6)
-)
-
-M <- cbind(
-  c(1,2,3), 
-  c(4,5,6)
-)
-
-Transpose of a matrix:
-t(M)
-
-Inverse of a matrix:
-solve(M)
-
-diag(c(1,2,3,4))
