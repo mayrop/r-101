@@ -97,7 +97,7 @@ df$Sepal.Area <- df$Sepal.Length * df$Sepal.Width
 table(df$Species)
 
 # Let's get proportions
-prop.table(df$Species)
+prop.table(table(df$Species))
 
 # Now let's get the mean for each column per group
 lapply(split(df[, 1:4], df$Species), colMeans)
